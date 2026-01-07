@@ -135,12 +135,6 @@ docker run -p 8000:8000 -e GROQ_API_KEY=<key> govt-rag-api
 
 ---
 
-## Resume Summary
-
-> Built a Retrieval-Augmented Generation (RAG) system over government documents using embeddings, FAISS, and an API-based LLM, exposed via FastAPI and containerized with Docker for deployment readiness.
-
----
-
 ## Disclaimer
 
 This project uses publicly available government documents strictly for educational and research purposes.
