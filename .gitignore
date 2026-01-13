@@ -8,8 +8,8 @@ venv/
 project/
 
 # Data
-data/raw_docs/
-data/processed/
+Backend/data/raw_docs/
+Backend/data/processed/
 
 # HuggingFace cache
 .cache/
