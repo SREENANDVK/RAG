@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core.config import get_settings
+from app.core.config import get_settings
 
 from app.api.routes import router, init_store
 from app.services.document_loader import DocumentLoader
@@ -24,18 +24,31 @@ app.add_middleware(
 loader = DocumentLoader(settings.DATA_DIR)
 docs = loader.load_pdfs()
 
-splitter = TextSplitter(chunk_size=settings.CHUNK_SIZE, overlap=settings.CHUNK_OVERLAP)
-chunks = splitter.split(docs)
+if not docs:
+    print("⚠️ No documents found. RAG will start without indexed data.")
+    vector_store = None
+    chunks = []
+else:
+    splitter = TextSplitter(
+        chunk_size=settings.CHUNK_SIZE,
+        overlap=settings.CHUNK_OVERLAP
+    )
+    chunks = splitter.split(docs)
 
-texts = [c["text"] for c in chunks]
+    texts = [c["text"] for c in chunks]
 
-embedder = EmbeddingService()
-embeddings = embedder.embed_texts(texts)
+    if not texts:
+        print("⚠️ No text chunks created.")
+        vector_store = None
+    else:
+        embedder = EmbeddingService()
+        embeddings = embedder.embed_texts(texts)
 
-vector_store = VectorStore(dim=embeddings.shape[1])
-vector_store.add(embeddings)
+        vector_store = VectorStore(dim=embeddings.shape[1])
+        vector_store.add(embeddings)
 
 init_store(vector_store, chunks)
+
 
 app.include_router(router)
 

@@ -14,7 +14,7 @@ class Settings:
     CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 50))
 
     # Paths
-    DATA_DIR = os.getenv("DATA_DIR", "Backend/data/raw_docs")
+    DATA_DIR = os.getenv("DATA_DIR", "data/raw_docs")
 
 @lru_cache
 def get_settings():
