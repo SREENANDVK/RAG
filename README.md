@@ -10,13 +10,13 @@ Instead of relying on a language model’s internal knowledge, the system retrie
 
 ## Key Features
 
-* 📄 Ingests and processes Government PDF documents
-* ✂️ Chunks large documents with overlap for context preservation
-* 🧠 Uses semantic embeddings for meaning-based search
-* 📦 Stores vectors in FAISS for fast retrieval
-* 🔍 Implements Retrieval-Augmented Generation (RAG)
-* 🌐 Exposes functionality via a FastAPI backend
-* 🐳 Dockerized for deployment consistency (cloud / CI-ready)
+*  Ingests and processes Government PDF documents
+*  Chunks large documents with overlap for context preservation
+*  Uses semantic embeddings for meaning-based search
+*  Stores vectors in FAISS for fast retrieval
+*  Implements Retrieval-Augmented Generation (RAG)
+*  Exposes functionality via a FastAPI backend
+*  Dockerized for deployment consistency (cloud / CI-ready)
 
 ---
 
