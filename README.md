@@ -2,21 +2,25 @@
 
 ## Overview
 
-This project is a **Retrieval-Augmented Generation (RAG) based AI system** built to answer user questions using **official Government PDF documents** as the source of truth.
+This project is a **Retrieval-Augmented Generation (RAG) based AI system** that answers user questions using **official Government PDF documents** as the source of truth.
 
 Instead of relying on a language model’s internal knowledge, the system retrieves relevant content from government documents and generates answers **strictly grounded in those documents**, reducing hallucinations and improving reliability.
+
+The project is structured as a **production-style backend service** with a lightweight frontend and deployment-ready configuration.
 
 ---
 
 ## Key Features
 
-*  Ingests and processes Government PDF documents
-*  Chunks large documents with overlap for context preservation
-*  Uses semantic embeddings for meaning-based search
-*  Stores vectors in FAISS for fast retrieval
-*  Implements Retrieval-Augmented Generation (RAG)
-*  Exposes functionality via a FastAPI backend
-*  Dockerized for deployment consistency (cloud / CI-ready)
+* Ingests and processes Government PDF documents
+* Chunks large documents with overlap for context preservation
+* Uses semantic embeddings for meaning-based search
+* Stores vectors in FAISS for fast retrieval
+* Implements Retrieval-Augmented Generation (RAG)
+* Exposes functionality via a FastAPI backend
+* Centralized, environment-driven configuration
+* Graceful handling of empty or missing document indexes
+* Docker-ready for CI / cloud environments
 
 ---
 
@@ -24,15 +28,60 @@ Instead of relying on a language model’s internal knowledge, the system retrie
 
 **High-level flow:**
 
-1. Government PDFs are loaded and cleaned
+1. Government PDFs are loaded from the data directory
 2. Text is split into overlapping chunks
-3. Each chunk is converted into an embedding
+3. Each chunk is converted into a semantic embedding
 4. Embeddings are stored in a FAISS vector index
-5. User query is embedded and semantically searched
-6. Top relevant chunks are injected into the LLM prompt
+5. User queries are embedded and semantically searched
+6. Top relevant chunks are injected into the prompt
 7. An API-based LLM generates a grounded answer
 
-This design keeps **retrieval and generation decoupled**, allowing easy model or provider changes.
+**Design principle:**
+
+Retrieval and generation are **decoupled**, allowing model or provider changes without impacting the rest of the system.
+
+### Architecture Diagram
+
+```
+┌──────────────┐
+│   Frontend   │
+│ (HTML / JS)  │
+└──────┬───────┘
+       │  HTTP POST /query
+       ▼
+┌──────────────┐
+│   FastAPI    │
+│   Backend    │
+└──────┬───────┘
+       │
+       │ embed(query)
+       ▼
+┌──────────────┐
+│  Embedding   │
+│   Model      │
+└──────┬───────┘
+       │
+       │ vector search
+       ▼
+┌──────────────┐
+│   FAISS      │
+│ Vector Store │
+└──────┬───────┘
+       │ top-k chunks
+       ▼
+┌──────────────┐
+│  RAG Prompt  │
+│  Constructor │
+└──────┬───────┘
+       │
+       │ context + question
+       ▼
+┌──────────────┐
+│ API-based    │
+│     LLM      │
+│   (Groq)     │
+└──────────────┘
+```
 
 ---
 
@@ -44,50 +93,55 @@ This design keeps **retrieval and generation decoupled**, allowing easy model or
 * **Vector Database:** FAISS
 * **LLM:** API-based (Groq – LLaMA 3.1 Instant)
 * **Containerization:** Docker
-* **Deployment-ready:** Yes (CI / Cloud oriented)
+* **Deployment:** CI / Cloud oriented
 
 ---
 
 ## Project Structure
 
 ```
-app/
-├── api/            # FastAPI routes
-├── services/       # Core RAG components
-│   ├── document_loader.py
-│   ├── text_splitter.py
-│   ├── embedding_service.py
-│   ├── vector_store.py
-│   └── rag_pipeline.py
-├── main.py         # FastAPI app entry
-
-data/
-├── raw_docs/       # Government PDFs (ignored in Git)
-
-Dockerfile
-requirements.txt
+RAG Government PDF Assistant/
+├── Backend/
+│   ├── app/
+│   │   ├── api/            # FastAPI routes
+│   │   ├── services/       # Core RAG components
+│   │   ├── core/           # Config & prompts
+│   │   ├── db/             # Persistence placeholders
+│   │   └── main.py         # FastAPI entry point
+│   ├── data/
+│   │   └── raw_docs/       # Government PDFs (ignored in Git)
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── .dockerignore
+│
+├── Frontend/
+│   └── index.html          # Simple UI consuming the API
+│
+├── README.md
+└── .gitignore
 ```
 
 ---
 
 ## How RAG Is Implemented
 
-* **Retrieval:** FAISS performs cosine similarity search over normalized embeddings
+* **Retrieval:** FAISS performs cosine similarity search over embeddings
 * **Augmentation:** Retrieved chunks are concatenated as context
-* **Generation:** LLM is prompted to answer *only* from provided context
-* **Control:** If information is missing, the model is instructed to refuse
+* **Generation:** The LLM is prompted to answer *only* from the provided context
+* **Safety:** If no documents or no relevant context exist, the API responds gracefully without crashing
 
-This approach is preferred over fine-tuning for:
+This approach is preferred over fine-tuning because it offers:
 
 * Lower cost
-* Faster updates
-* Reduced hallucination
+* Faster data updates
+* Reduced hallucination risk
 
 ---
 
 ## Running Locally (Development)
 
 ```bash
+cd Backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
@@ -104,9 +158,10 @@ http://127.0.0.1:8000/docs
 
 ## Docker Support
 
-The application includes a Docker configuration for consistent deployment.
+The application includes Docker configuration for consistent deployment.
 
 ```bash
+cd Backend
 docker build -t govt-rag-api .
 docker run -p 8000:8000 -e GROQ_API_KEY=<key> govt-rag-api
 ```
@@ -127,7 +182,8 @@ docker run -p 8000:8000 -e GROQ_API_KEY=<key> govt-rag-api
 
 * OCR integration for scanned PDFs
 * Persistent vector storage
-* Authentication & rate limiting
+* Document upload & ingestion endpoint
+* Authentication and rate limiting
 * Streaming responses
 * Cloud deployment (AWS EC2 / ECS)
 
