@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import router, init_store
 from app.services.document_loader import DocumentLoader
@@ -8,7 +9,16 @@ from app.services.vector_store import VectorStore
 
 app = FastAPI(title="Government RAG Assistant")
 
-# ---- build pipeline ON STARTUP ----
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# build pipeline ON STARTUP 
 loader = DocumentLoader("data/raw_docs")
 docs = loader.load_pdfs()
 
@@ -26,3 +36,7 @@ vector_store.add(embeddings)
 init_store(vector_store, chunks)
 
 app.include_router(router)
+
+@app.get("/")
+def root():
+    return {"message": "Government RAG API is running."}

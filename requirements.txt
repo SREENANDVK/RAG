@@ -1,3 +1,9 @@
+fastapi
+uvicorn
+sentence-transformers
+faiss-cpu
+groq
 pdfplumber
 pypdf
-sentence-transformers
+numpy
+pydantic
