@@ -6,8 +6,6 @@ This project is a **Retrieval-Augmented Generation (RAG) based AI system** built
 
 Instead of relying on a language model’s internal knowledge, the system retrieves relevant content from government documents and generates answers **strictly grounded in those documents**, reducing hallucinations and improving reliability.
 
-This project is designed to reflect **real-world AI engineering practices**, not notebook-only experiments.
-
 ---
 
 ## Key Features
